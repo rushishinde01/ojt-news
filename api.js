@@ -6,15 +6,37 @@ import {
 } from "./state.js";
 
 // ─────────────────────────────────────────────────────────────
-// GNews API — free tier, CORS-friendly, works from the browser
-// Sign up for a free key at: https://gnews.io
-// Free plan: 100 req/day, max 10 articles per request
+// The Guardian Open Platform API — free, CORS-friendly for browsers
+// Built-in "test" key works immediately (rate-limited but functional)
+// For production: get your own free key at:
+// https://open-platform.theguardian.com/access/
 // ─────────────────────────────────────────────────────────────
-const API_KEY = "YOUR_GNEWS_API_KEY_HERE";
-const BASE    = "https://gnews.io/api/v4";
+const API_KEY = "test";
+const BASE    = "https://content.guardianapis.com";
+const FIELDS  = "show-fields=thumbnail,trailText";
 
-// GNews free plan caps results at 10 per request
-const MAX_PER_PAGE = 10;
+// Map app category names → Guardian section identifiers
+const SECTION_MAP = {
+    general:       "",              // no section = all sections
+    business:      "business",
+    technology:    "technology",
+    sports:        "sport",
+    entertainment: "culture",
+    health:        "lifeandstyle",
+    science:       "science"
+};
+
+// Normalise a Guardian article to the shape render.js expects
+function normalise(article) {
+    return {
+        title:       article.webTitle,
+        description: article.fields?.trailText  || null,
+        urlToImage:  article.fields?.thumbnail  || null,
+        url:         article.webUrl,
+        publishedAt: article.webPublicationDate,
+        source:      { name: article.sectionId || "The Guardian" }
+    };
+}
 
 export async function fetchNews(reset = false) {
 
@@ -23,7 +45,11 @@ export async function fetchNews(reset = false) {
         setLoading(true);
         setError("");
 
-        const pageSize = Math.min(state.pageSize, MAX_PER_PAGE);
+        const pageSize = Math.min(state.pageSize, 10);
+        const baseParams =
+            `${FIELDS}&page-size=${pageSize}&page=${state.page}` +
+            `&order-by=newest&api-key=${API_KEY}`;
+
         let url = "";
 
         // SEARCH MODE
@@ -31,16 +57,18 @@ export async function fetchNews(reset = false) {
 
             url =
                 `${BASE}/search?q=${encodeURIComponent(state.searchQuery)}` +
-                `&lang=en&max=${pageSize}&page=${state.page}&token=${API_KEY}`;
+                `&${baseParams}`;
 
         }
 
         // CATEGORY / TOP-HEADLINES MODE
         else {
 
-            url =
-                `${BASE}/top-headlines?category=${state.category}` +
-                `&country=${state.country}&lang=en&max=${pageSize}&page=${state.page}&token=${API_KEY}`;
+            const section = SECTION_MAP[state.category] || "";
+
+            url = section
+                ? `${BASE}/search?section=${section}&${baseParams}`
+                : `${BASE}/search?${baseParams}`;
 
         }
 
@@ -48,9 +76,10 @@ export async function fetchNews(reset = false) {
 
         if (!response.ok) {
 
-            // GNews returns 403 when key is invalid/missing
-            if (response.status === 403) {
-                throw new Error("Invalid API key. Get a free key at gnews.io and update api.js.");
+            if (response.status === 401 || response.status === 403) {
+                throw new Error(
+                    "Invalid API key. Get a free key at open-platform.theguardian.com"
+                );
             }
 
             throw new Error("Failed to fetch news. Please try again.");
@@ -59,13 +88,15 @@ export async function fetchNews(reset = false) {
 
         const data = await response.json();
 
-        // Normalize GNews article shape to match render.js expectations:
-        // GNews uses `article.image`; render.js expects `article.urlToImage`
-        const articles = (data.articles || [])
-            .map(article => ({
-                ...article,
-                urlToImage: article.image || null
-            }))
+        if (data.response?.status !== "ok") {
+            throw new Error(
+                data.response?.message || "Something went wrong."
+            );
+        }
+
+        // Normalise and filter: only keep articles that have all three fields
+        const articles = (data.response.results || [])
+            .map(normalise)
             .filter(
                 article =>
                     article.title &&
