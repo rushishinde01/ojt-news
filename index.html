@@ -1,0 +1,110 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Daily News Hub</title>
+
+    
+    <link rel="stylesheet" href="style.css">
+
+    <link
+        href="https://fonts.googleapis.com/css2?family=Merriweather:wght@400;700&family=Inter:wght@300;400;500;600&display=swap"
+        rel="stylesheet">
+</head>
+
+<body>
+
+    <header>
+
+        <div class="logo">
+            📰 Daily News Hub
+        </div>
+
+        <div class="controls">
+
+            <input type="text" id="search-input" placeholder="Search news...">
+
+            <select id="category-select">
+
+                <option value="general">General</option>
+                <option value="business">Business</option>
+                <option value="technology">Technology</option>
+                <option value="sports">Sports</option>
+                <option value="entertainment">Entertainment</option>
+                <option value="health">Health</option>
+                <option value="science">Science</option>
+
+            </select>
+
+            <select id="country-select">
+
+                <option value="in">🇮🇳 India</option>
+                <option value="us">🇺🇸 USA</option>
+                <option value="gb">🇬🇧 UK</option>
+                <option value="jp">🇯🇵 Japan</option>
+
+            </select>
+
+            <button id="theme-btn">
+                🌙
+            </button>
+
+        </div>
+
+    </header>
+
+
+    <section class="trending">
+
+        <button class="topic">
+            AI
+        </button>
+
+        <button class="topic">
+            OpenAI
+        </button>
+
+        <button class="topic">
+            NASA
+        </button>
+
+        <button class="topic">
+            Apple
+        </button>
+
+        <button class="topic">
+            Bitcoin
+        </button>
+
+    </section>
+
+
+    <section id="loading">
+
+        <div class="spinner"></div>
+
+    </section>
+
+
+    <section id="error-box">
+
+    </section>
+
+
+    <section id="news-container">
+
+    </section>
+
+
+    <button id="load-more">
+        Load More News
+    </button>
+
+
+    <script type="module" src="./js/main.js"></script>
+
+</body>
+
+</html>
