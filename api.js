@@ -11,7 +11,7 @@ import {
 // For production: get your own free key at:
 // https://open-platform.theguardian.com/access/
 // ─────────────────────────────────────────────────────────────
-const API_KEY = "test";
+const API_KEY = "39489881-beb9-4bbd-ac8e-b06fc7703ace";
 const BASE    = "https://content.guardianapis.com";
 const FIELDS  = "show-fields=thumbnail,trailText";
 
