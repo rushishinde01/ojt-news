@@ -3,7 +3,7 @@ import {
     addArticles,
     setLoading,
     setError
-} from "./state.js";
+} from "state.js";
 
 const API_KEY = "7da4ebae6e2a4ad89948ad474f82d01a";
 
