@@ -17,7 +17,7 @@ const FIELDS  = "show-fields=thumbnail,trailText";
 
 // Map app category names → Guardian section identifiers
 const SECTION_MAP = {
-    general:       "",              // no section = all sections
+    general:       "",
     business:      "business",
     technology:    "technology",
     sports:        "sport",
@@ -94,7 +94,7 @@ export async function fetchNews(reset = false) {
             );
         }
 
-        // Normalise and filter: only keep articles that have all three fields
+        // Normalise and filter: only keep articles with all three fields
         const articles = (data.response.results || [])
             .map(normalise)
             .filter(
