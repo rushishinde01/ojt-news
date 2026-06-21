@@ -15,8 +15,8 @@ export const state = {
     // Pagination
     page: 1,
 
-    // Articles per request
-    pageSize: 12,
+    // Articles per request (GNews free plan caps at 10)
+    pageSize: 10,
 
     // Loading state
     isLoading: false,
