@@ -3,9 +3,18 @@ import {
     addArticles,
     setLoading,
     setError
-} from "state.js";
+} from "./state.js";
 
-const API_KEY = "7da4ebae6e2a4ad89948ad474f82d01a";
+// ─────────────────────────────────────────────────────────────
+// GNews API — free tier, CORS-friendly, works from the browser
+// Sign up for a free key at: https://gnews.io
+// Free plan: 100 req/day, max 10 articles per request
+// ─────────────────────────────────────────────────────────────
+const API_KEY = "5294f4a71563e98e4a75a9cfe6d07594";
+const BASE    = "https://gnews.io/api/v4";
+
+// GNews free plan caps results at 10 per request
+const MAX_PER_PAGE = 10;
 
 export async function fetchNews(reset = false) {
 
@@ -14,23 +23,24 @@ export async function fetchNews(reset = false) {
         setLoading(true);
         setError("");
 
+        const pageSize = Math.min(state.pageSize, MAX_PER_PAGE);
         let url = "";
 
         // SEARCH MODE
         if (state.searchQuery.trim() !== "") {
 
             url =
-                `https://newsapi.org/v2/everything?q=${encodeURIComponent(
-                    state.searchQuery
-                )}&page=${state.page}&pageSize=${state.pageSize}&sortBy=publishedAt&apiKey=${API_KEY}`;
+                `${BASE}/search?q=${encodeURIComponent(state.searchQuery)}` +
+                `&lang=en&max=${pageSize}&page=${state.page}&token=${API_KEY}`;
 
         }
 
-        // CATEGORY MODE
+        // CATEGORY / TOP-HEADLINES MODE
         else {
 
             url =
-                `https://newsapi.org/v2/top-headlines?country=${state.country}&category=${state.category}&page=${state.page}&pageSize=${state.pageSize}&apiKey=${API_KEY}`;
+                `${BASE}/top-headlines?category=${state.category}` +
+                `&country=${state.country}&lang=en&max=${pageSize}&page=${state.page}&token=${API_KEY}`;
 
         }
 
@@ -38,28 +48,30 @@ export async function fetchNews(reset = false) {
 
         if (!response.ok) {
 
-            throw new Error(
-                "Failed to fetch news."
-            );
+            // GNews returns 403 when key is invalid/missing
+            if (response.status === 403) {
+                throw new Error("Invalid API key. Get a free key at gnews.io and update api.js.");
+            }
+
+            throw new Error("Failed to fetch news. Please try again.");
 
         }
 
         const data = await response.json();
 
-        if (data.status !== "ok") {
-
-            throw new Error(
-                data.message || "Something went wrong."
+        // Normalize GNews article shape to match render.js expectations:
+        // GNews uses `article.image`; render.js expects `article.urlToImage`
+        const articles = (data.articles || [])
+            .map(article => ({
+                ...article,
+                urlToImage: article.image || null
+            }))
+            .filter(
+                article =>
+                    article.title &&
+                    article.urlToImage &&
+                    article.description
             );
-
-        }
-
-        const articles = data.articles.filter(
-            article =>
-                article.title &&
-                article.urlToImage &&
-                article.description
-        );
 
         if (reset) {
 
