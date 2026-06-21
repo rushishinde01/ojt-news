@@ -5,10 +5,10 @@ import {
     setCountry,
     nextPage,
     resetPage
-} from "./state.js";
+} from "state.js";
 
-import { fetchNews } from "./api.js";
-import { renderNews } from "./render.js";
+import { fetchNews } from "api.js";
+import { renderNews } from "render.js";
 
 const searchInput = document.getElementById("search-input");
 const categorySelect = document.getElementById("category-select");
