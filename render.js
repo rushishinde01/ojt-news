@@ -1,4 +1,4 @@
-import { state, addBookmark, removeBookmark } from "./state.js";
+import { state, addBookmark, removeBookmark } from "state.js";
 
 const newsContainer = document.getElementById("news-container");
 const loadingSection = document.getElementById("loading");
